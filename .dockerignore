@@ -1,0 +1,9 @@
+**
+!site/
+!site/**
+!lessons/
+!lessons/output/
+!lessons/output/**
+!docker/
+!docker/nginx.conf
+!Dockerfile

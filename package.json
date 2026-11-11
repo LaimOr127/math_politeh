@@ -1,0 +1,9 @@
+{
+  "name": "python-lab-course",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test site/tests/*.test.js",
+    "check": "npm run test"
+  }
+}
