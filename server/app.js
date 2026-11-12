@@ -7,7 +7,7 @@ import { courseLessons } from '../site/src/data/course.js';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const COOKIE = 'python_lab_teacher';
-const MIME = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
+const MIME = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
 const digest = value => createHash('sha256').update(value).digest();
 
 /** @param {object} options Server settings; codes stay on the server. @returns {http.Server} Unbound HTTP server. Sessions are held in memory until logout, expiry or restart. */
@@ -50,11 +50,17 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
         if (attempt.count >= maxAttempts) return json(429,{message:'Слишком много попыток. Попробуйте позже.'},{'Retry-After':String(Math.ceil((attempt.until-timestamp)/1000))});
         if (!attempts.has(ip) && attempts.size >= 10000) return json(503,{message:'Попробуйте позже.'});
         attempt.count++; attempts.set(ip,attempt);
-        let raw = '';
-        for await (const chunk of req) {raw += chunk; if (Buffer.byteLength(raw) > 2048) return json(413,{message:'Слишком длинный код.'});}
+        const chunks = [];
+        let bytes = 0;
+        for await (const chunk of req) {
+          bytes += chunk.length;
+          if (bytes > 2048) return json(413,{message:'Слишком длинный код.'});
+          chunks.push(chunk);
+        }
         let value;
-        try {value = JSON.parse(raw);} catch {return json(400,{message:'Некорректный запрос.'});}
-        const candidate = typeof value.code === 'string' ? digest(value.code.trim()) : digest('');
+        try {value = JSON.parse(Buffer.concat(chunks).toString('utf8'));} catch {return json(400,{message:'Некорректный запрос.'});}
+        if (!value || typeof value !== 'object' || Array.isArray(value) || typeof value.code !== 'string') return json(400,{message:'Некорректный запрос.'});
+        const candidate = digest(value.code.trim());
         if (!hashes.some(hash => timingSafeEqual(candidate,hash))) return json(401,{message:'Код не подошёл. Проверьте его и попробуйте снова.'});
         if (sessions.size >= 10000) return json(503,{message:'Попробуйте позже.'});
         if (token) sessions.delete(token);

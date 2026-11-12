@@ -13,6 +13,8 @@ API возвращает JSON с Cache-Control no-store. Учебные файл
 | POST /api/teacher/logout | Отзыв сессии | 200, 403 |
 | GET /lessons/output/имя | Разрешённый DOCX/PPTX | 200, 401, 404 |
 
+Вход принимает JSON-объект с текстовым `code`. Некорректный JSON, `null`, массивы, скаляры и нетекстовый код возвращают 400; неверный текстовый код — 401. Тело ограничено 2048 байтами (413 при превышении); UTF-8 декодируется после получения всех частей запроса.
+
 POST требует Content-Type application/json и Origin текущего сайта. За HTTPS-прокси задаётся PUBLIC_ORIGIN. TEACHER_CODES заменяет код по умолчанию lesson; несколько кодов разделяются запятыми.
 
 Cookie python_lab_teacher имеет HttpOnly, SameSite=Strict, Path=/ и срок восемь часов. COOKIE_SECURE=true добавляет Secure. Перезапуск завершает сессии. Лимит — десять попыток за пятнадцать минут на адрес подключения; 429 содержит Retry-After. Старые файлы не выдаются даже после входа.
@@ -31,9 +33,9 @@ Cookie python_lab_teacher имеет HttpOnly, SameSite=Strict, Path=/ и сро
 
 ## Отображение
 
-`PreferencesStore(storage).load()` возвращает `{theme, introSeen}`. `setTheme(theme)` принимает light, dark или system. `dismissIntro()` отмечает просмотр знакомства. Ошибки хранения не мешают работе. `applyTheme()` меняет data-theme и подписи переключателей. До выбора учитывается системная тема.
+`PreferencesStore(storage).load()` возвращает `{theme, introSeen}`. `setTheme(theme)` принимает light, dark или system. `dismissIntro()` отмечает просмотр знакомства. Ошибки хранения не мешают работе. `applyTheme()` меняет data-theme, подписи переключателей и meta theme-color. До выбора учитывается системная тема.
 
-Маршруты: #home, #lesson/id, #test/id, #materials. После перезагрузки тест открывается на первом нерешённом вопросе. Знакомство удерживает фокус, фон получает inert, Escape закрывает окно.
+Маршруты: #home, #lesson/id, #test/id, #materials. После перезагрузки тест открывается на первом нерешённом вопросе. Знакомство удерживает фокус даже при смене маршрута, фон получает inert, Escape закрывает окно. Ссылка «К содержимому» переводит фокус на main без изменения маршрута урока; после сброса фокус возвращается в main.
 
 ## Сборка печатных материалов
 

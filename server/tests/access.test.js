@@ -1,3 +1,5 @@
+import http from 'node:http';
+import { setTimeout } from 'node:timers/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../app.js';
@@ -55,4 +57,61 @@ test('login limits repeated attempts and recovers after the window', async t => 
   assert.equal((await login('lesson')).status,429);
   now = 101;
   assert.equal((await login('lesson')).status,200);
+});
+
+// Exercise the actual HTTP parser, including JSON type and UTF-8 boundaries.
+test('login rejects invalid JSON shapes and oversized request bodies', async t => {
+  const server = createApp({codes:['lesson'], maxAttempts:30});
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = {'Content-Type':'application/json', Origin:base};
+  for (const body of ['null','[]','true','42','"lesson"','{}','{"code":42}','{']) {
+    const response = await fetch(base+'/api/teacher/login', {method:'POST',headers,body});
+    assert.equal(response.status,400,body);
+    assert.equal(response.headers.get('set-cookie'),null);
+  }
+  const large = await fetch(base+'/api/teacher/login',{method:'POST',headers,body:JSON.stringify({code:'a'.repeat(2048)})});
+  assert.equal(large.status,413);
+  assert.equal((await fetch(base+'/health')).status,200);
+});
+
+test('login decodes a Cyrillic code after all UTF-8 chunks arrive', async t => {
+  const code = 'учитель-42';
+  const server = createApp({codes:[code]});
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const body = Buffer.from(JSON.stringify({code}));
+  const split = body.indexOf(Buffer.from('у')) + 1;
+  const response = await new Promise((resolve,reject) => {
+    const request = http.request(base+'/api/teacher/login',{method:'POST',headers:{'Content-Type':'application/json',Origin:base}},resolve);
+    request.on('error',reject);
+    request.write(body.subarray(0,split));
+    setTimeout(25).then(() => request.end(body.subarray(split))).catch(reject);
+  });
+  response.resume();
+  assert.equal(response.statusCode,200);
+  assert.match(response.headers['set-cookie'][0],/HttpOnly/);
+});
+test('HTTPS proxy configuration protects writes and serves local brand assets with strict headers', async t => {
+  const origin = 'https://school.example';
+  const server = createApp({codes:['lesson'],secureCookies:true,publicOrigin:origin});
+  await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const login = headers => fetch(base+'/api/teacher/login',{method:'POST',headers,body:'{"code":"lesson"}'});
+  assert.equal((await login({'Content-Type':'application/json',Origin:base})).status,403);
+  assert.equal((await login({'Content-Type':'text/plain',Origin:origin})).status,403);
+  const response = await login({'Content-Type':'application/json',Origin:origin});
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('set-cookie'),/; Secure/);
+  for (const [asset,type] of [['iskra.webp','image/webp'],['genesis-mark.svg','image/svg+xml'],['fonts/onest-cyrillic.woff2','font/woff2']]) {
+    const assetResponse = await fetch(base+'/site/assets/'+asset,{method:'HEAD'});
+    assert.equal(assetResponse.status,200);
+    assert.equal(assetResponse.headers.get('content-type'),type);
+    assert.equal(assetResponse.headers.get('x-content-type-options'),'nosniff');
+    assert.match(assetResponse.headers.get('content-security-policy'),/script-src 'self'/);
+    assert.doesNotMatch(assetResponse.headers.get('content-security-policy'),/unsafe-inline|unsafe-eval/);
+  }
 });

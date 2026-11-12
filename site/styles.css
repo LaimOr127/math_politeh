@@ -1,3 +1,39 @@
+@font-face {
+font-family:"Onest";
+font-style:normal;
+font-weight:100 900;
+font-display:swap;
+src:url("assets/fonts/onest-cyrillic.woff2") format("woff2");
+unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116
+}
+
+@font-face {
+font-family:"Onest";
+font-style:normal;
+font-weight:100 900;
+font-display:swap;
+src:url("assets/fonts/onest-latin.woff2") format("woff2");
+unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD
+}
+
+@font-face {
+font-family:"Unbounded";
+font-style:normal;
+font-weight:200 900;
+font-display:swap;
+src:url("assets/fonts/unbounded-cyrillic.woff2") format("woff2");
+unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116
+}
+
+@font-face {
+font-family:"Unbounded";
+font-style:normal;
+font-weight:200 900;
+font-display:swap;
+src:url("assets/fonts/unbounded-latin.woff2") format("woff2");
+unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD
+}
+
 /* Cosmic learning environment. Shared by student and teacher pages. */
 :root  {
 color-scheme:light;
@@ -6,22 +42,22 @@ color-scheme:light;
 --surface-soft:#eee8f8;
 --ink:#26203c;
 --muted:#69617d;
---accent:#6a459b;
+--accent:#58416e;
 --accent-hover:#53317d;
 --accent-soft:#e6dcf5;
 --line:#dcd3e9;
---hero:#e7ddf2;
---hero-ink:#302040;
+--hero:#eee7f5;
+--hero-ink:#30253e;
 --success:#23724c;
 --error:#ad303d;
 --shadow:0 18px 55px #4931690c;
-font-family:"Segoe UI",Arial,sans-serif
+font-family:"Onest","Segoe UI",sans-serif
 }
 
 :root[data-theme="dark"]  {
 color-scheme:dark;
---paper:#121020;
---surface:#201b32;
+--paper:#171329;
+--surface:#211a32;
 --surface-soft:#29213f;
 --ink:#f5f0ff;
 --muted:#b8adcd;
@@ -29,8 +65,8 @@ color-scheme:dark;
 --accent-hover:#d6bcff;
 --accent-soft:#34264d;
 --line:#3e3354;
---hero:#e5dcef;
---hero-ink:#302040;
+--hero:#eee7f5;
+--hero-ink:#30253e;
 --success:#8ee2b2;
 --error:#ffacb5;
 --shadow:0 18px 55px #0002
@@ -39,8 +75,8 @@ color-scheme:dark;
 @media(prefers-color-scheme:dark) {
 :root:not([data-theme]) {
 color-scheme:dark;
---paper:#121020;
---surface:#201b32;
+--paper:#171329;
+--surface:#211a32;
 --surface-soft:#29213f;
 --ink:#f5f0ff;
 --muted:#b8adcd;
@@ -65,13 +101,14 @@ margin:0;
 background:radial-gradient(ellipse at 85% 0%,#a389d414,transparent 50%),var(--paper);
 color:var(--ink);
 line-height:1.65;
-min-width:320px
+min-width:0
 }
  button,input {
 font:inherit
 }
 button,a {
--webkit-tap-highlight-color:transparent
+touch-action:manipulation;
+-webkit-tap-highlight-color:#a389d433
 }
 button {
 cursor:pointer
@@ -89,11 +126,13 @@ outline:3px solid #b478df;
 outline-offset:5px
 }
 h1,h2,h3,p {
+scroll-margin-top:24px;
 overflow-wrap:break-word
 }
 h1,h2,h3 {
-line-height:1.15;
-letter-spacing:-.035em
+line-height:1.2;
+letter-spacing:-.025em;
+text-wrap:balance
 }
 h1 {
 font-size:clamp(2.4rem,4.6vw,4.3rem);
@@ -120,18 +159,15 @@ max-width:60ch;
 line-height:1.8
 }
 .eyebrow {
-font-size:.72rem;
-font-weight:750;
-letter-spacing:.12em;
-text-transform:uppercase;
+font-size:.8rem;
+font-weight:650;
 color:var(--accent);
 margin:0 0 8px
 }
 .orbit-label {
 display:inline-block;
-font-size:.65rem;
-font-weight:750;
-letter-spacing:.12em;
+font-size:.75rem;
+font-weight:650;
 border:1px solid currentColor;
 border-radius:20px;
 padding:5px 12px;
@@ -156,31 +192,26 @@ align-items:center;
 gap:12px;
 color:var(--ink);
 text-decoration:none;
-font-size:1rem;
-font-weight:750;
+font-family:"Unbounded","Onest",sans-serif;
+font-size:1.05rem;
+font-weight:700;
 line-height:1.25;
 white-space:nowrap
 }
 .brand small {
 display:block;
+font-family:"Onest",sans-serif;
 color:var(--muted);
-font-size:.62rem;
+font-size:.7rem;
 font-weight:400;
 letter-spacing:.04em;
 margin-top:5px
 }
 .brand-mark {
-display:grid;
-place-items:center;
+display:block;
 width:40px;
-height:42px;
-background:linear-gradient(135deg,#c7acf0,#70528e);
-color:#fff;
-border-radius:13px 13px 5px 13px;
-font-size:1.5rem;
-font-weight:800;
-transform:rotate(-5deg);
-box-shadow:0 4px 18px #b390db30
+height:40px;
+flex-shrink:0
 }
 .main-nav {
 display:flex;
@@ -246,17 +277,34 @@ margin:0 0 22px;
 text-decoration:none
 }
 
+.platform-link {
+display:inline-block;
+margin-top:28px;
+color:var(--muted);
+font-size:.85rem;
+text-decoration:none;
+min-height:44px;
+padding-block:10px
+}
+.hero-copy {
+padding:46px 40px
+}
+.hero-details {
+color:#675477;
+font-size:.85rem;
+margin:0 0 24px
+}
 .hero-home {
 position:relative;
 display:grid;
-grid-template-columns:1.15fr 1fr;
-align-items:center;
-gap:30px;
+grid-template-columns:1.35fr 1fr;
+align-items:stretch;
+gap:0;
 background:var(--hero);
 color:var(--hero-ink);
-border-radius:24px;
-margin:38px 0 28px;
-padding:54px 50px;
+border-radius:18px;
+margin:18px 0 30px;
+padding:0;
 overflow:hidden;
 min-height:475px
 }
@@ -268,16 +316,12 @@ color:#675477;
 font-size:1rem
 }
 .hero-home h1 {
-font-size:clamp(2.2rem,4.2vw,3.6rem);
+font-size:clamp(2.15rem,3.6vw,3.15rem);
 line-height:1.15;
-letter-spacing:-.045em
-}
-.hero-home h1 em {
-font-style:normal;
-color:#75509a
+letter-spacing:-.03em
 }
 .hero-home .primary-button {
-background:#65418d;
+background:#58416e;
 color:white;
 gap:18px
 }
@@ -290,7 +334,8 @@ display:block
 position:relative;
 display:grid;
 place-items:center;
-height:370px;
+min-height:450px;
+background:#ddd2e8;
 isolation:isolate
 }
 .hero-universe:before {
@@ -304,12 +349,11 @@ box-shadow:0 0 80px #f7efff80;
 z-index:-2
 }
 .home-mascot {
-width:245px;
+width:min(85%,340px);
 height:auto;
 position:relative;
 z-index:2;
-filter:drop-shadow(0 14px 16px #5b397a23);
-transform:rotate(4deg)
+filter:drop-shadow(0 14px 16px #5b397a23)
 }
 .orbit {
 position:absolute;
@@ -324,7 +368,6 @@ z-index:-1
 transform:rotate(48deg);
 width:320px;
 height:300px;
-border-style:dashed;
 opacity:.6
 }
 .planet {
@@ -355,10 +398,6 @@ left:16px;
 top:54px;
 color:#b4874d
 }
-.star-two {
-right:25px;
-bottom:46px
-}
 .code-satellite {
 position:absolute;
 left:20px;
@@ -368,7 +407,7 @@ box-shadow:0 10px 24px #754e9f12;
 border:1px solid #fff;
 border-radius:10px;
 padding:10px 18px;
-color:#6a459b;
+color:#58416e;
 font:13px Consolas,monospace;
 transform:rotate(-6deg);
 z-index:3
@@ -496,7 +535,6 @@ font-size:.65rem;
 letter-spacing:.09em;
 color:var(--accent);
 font-weight:750;
-text-transform:uppercase;
 margin:0
 }
 .course-card.locked {
@@ -541,10 +579,12 @@ padding:22px;
 font-size:.85rem
 }
 .reading-aside img {
+height:auto;
 display:block;
 margin:0 auto 12px
 }
 .reading-section {
+min-width:0;
 background:var(--surface);
 border:1px solid var(--line);
 border-radius:18px;
@@ -856,6 +896,7 @@ gap:30px;
 width:min(100%,680px);
 max-height:90dvh;
 overflow:auto;
+overscroll-behavior:contain;
 background:var(--surface);
 border:1px solid var(--line);
 border-radius:22px;
@@ -902,14 +943,17 @@ gap:16px
 font-size:.9rem
 }
 .hero-home {
-padding:36px 32px;
+padding:0;
 gap:0
 }
+.hero-copy {
+padding:36px 30px
+}
 .hero-universe {
-height:340px
+min-height:380px
 }
 .home-mascot {
-width:210px
+width:min(85%,300px)
 }
 .orbit {
 width:300px
@@ -947,22 +991,25 @@ margin-left:auto
 }
 .hero-home {
 grid-template-columns:1fr;
-padding:28px;
-margin:22px 0
+padding:0;
+margin:12px 0 24px
 }
 .hero-home h1 {
 font-size:clamp(2rem,7.3vw,3.5rem)
 }
+.hero-copy {
+padding:30px 28px
+}
 .hero-universe {
-height:290px;
-margin-top:25px
+min-height:320px;
+margin-top:0
 }
 .hero-universe:before {
 width:235px;
 height:235px
 }
 .home-mascot {
-width:195px
+width:245px
 }
 .orbit {
 width:285px;
@@ -1013,7 +1060,7 @@ padding:24px;
 gap:16px
 }
 .reading-layout,.test-layout {
-grid-template-columns:1fr;
+grid-template-columns:minmax(0,1fr);
 gap:20px
 }
 .reading-aside {
@@ -1083,8 +1130,8 @@ grid-template-columns:1fr
 .guide-card img {
 width:65px
 }
-.hero-home {
-padding:24px
+.hero-copy {
+padding:26px 22px
 }
 .brand small {
 display:none
@@ -1108,11 +1155,16 @@ button,a {
 transition:background .18s,border-color .18s,color .18s
 }
 .hero-universe .home-mascot {
-animation:float 7s ease-in-out infinite
+animation:arrive 1.2s ease-out both
 }
-@keyframes float {
-50% {
-transform:translateY(-10px) rotate(1deg)
+@keyframes arrive {
+from {
+opacity:0;
+transform:translateY(12px)
+}
+to {
+opacity:1;
+transform:translateY(0)
 }
 
 }

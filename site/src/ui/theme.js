@@ -8,6 +8,7 @@ export function applyTheme() {
   const saved = preferences.load().theme;
   const theme = saved === 'system' ? (systemTheme.matches ? 'dark' : 'light') : saved;
   document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#171329' : '#f3f0fa');
   for (const button of document.querySelectorAll('[data-action="theme"]')) {
     button.textContent = theme === 'dark' ? '☀ Светлая' : '☾ Тёмная';
     button.setAttribute('aria-label',theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
