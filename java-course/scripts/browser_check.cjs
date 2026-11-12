@@ -9,6 +9,16 @@ const root=path.resolve(__dirname,'../..'),base=process.env.BASE_URL||'http://lo
  const course=JSON.parse(await fs.readFile(path.join(root,'java-course/content/course.json'),'utf8'));
  const out=path.join(root,'.build/java-review/browser');await fs.mkdir(out,{recursive:true});
  try{
+  await page.goto(base+'/java/#java-01');
+  await page.waitForFunction(()=>document.querySelector('main img')?.naturalWidth>0);
+  check(await page.locator('main img').evaluate(i=>Math.abs(i.clientWidth/i.clientHeight-i.naturalWidth/i.naturalHeight)<.01),true);
+  await page.goto(base+'/java/#home');check(await page.locator('#lab').count(),0);
+  await page.locator('#practice-nav a[href="#graph-lab"]').click();
+  await page.locator('h1').filter({hasText:'Лаборатория графов'}).waitFor();
+  check(await page.locator('#practice-nav a').getAttribute('aria-current'),'page');
+  await page.reload();await page.locator('#edge-weight').waitFor();
+  check(await page.title(),'Лаборатория графов — Генезис-X');
+  check(await page.locator('#lab').count(),1);
   await page.goto(base+'/java/#java-02');check(await page.locator('form.task button[type=submit]').first().isDisabled(),true);
   await page.locator('#lesson-nav a[href="#java-01"]').click();await page.locator('h1').filter({hasText:'Первый сигнал'}).waitFor();
   await page.keyboard.press('Tab');
@@ -25,17 +35,27 @@ const root=path.resolve(__dirname,'../..'),base=process.env.BASE_URL||'http://lo
   }
   await page.reload();check(await page.locator('#progress-label').textContent(),'10 из 10');
   await page.locator('#lesson-nav a[href="#home"]').click();await page.locator('h1').filter({hasText:'От первого сигнала к своей сети'}).waitFor();
+  await page.locator('#practice-nav a[href="#graph-lab"]').click();await page.locator('h1').filter({hasText:'Лаборатория графов'}).waitFor();
   const lab=page.locator('form').filter({has:page.locator('#edge-weight')});
+  await page.locator('#prediction').fill('0');await lab.locator('button[type=submit]').click();check((await lab.locator('[role=status]').textContent()).startsWith('Сверьте трассировку.'),true);
+  await lab.locator('button[type=submit]').click();check(await page.locator('.map .edge.active').count(),3);
+  await page.locator('#edge-weight').fill('2');check(await page.locator('.map .edge.active').count(),0);check(await lab.locator('[role=status]').textContent(),'');
+  await page.locator('#edge-weight').focus();await page.keyboard.press('Tab');check(await page.locator('#edge-closed').evaluate(e=>e===document.activeElement),true);
+  await page.keyboard.press('Space');await page.keyboard.press('Tab');await page.keyboard.type('7');await page.keyboard.press('Tab');await page.keyboard.press('Enter');check((await lab.locator('[role=status]').textContent()).startsWith('Прогноз верный.'),true);
+  await page.locator('#edge-closed').uncheck();
+  await lab.getByRole('button',{name:'Новый вариант'}).click();check(await page.locator('#prediction').inputValue(),'');check(await page.locator('#prediction').evaluate(e=>e===document.activeElement),true);await page.locator('#edge-closed').uncheck();
   for(const w of [1,2,3,99]){await page.locator('#edge-weight').fill(String(w));await page.locator('#prediction').fill(w===1?'6':'7');await lab.locator('button[type=submit]').click();check((await lab.locator('[role=status]').textContent()).includes('Прогноз верный'),true);}
   await page.locator('#edge-closed').check();await page.locator('#prediction').fill('7');await lab.locator('button[type=submit]').click();check((await lab.locator('[role=status]').textContent()).includes('7 минут'),true);
   for(const width of [320,360,768,1440]){
    await page.setViewportSize({width,height:900});
-   for(const id of ['home',...course.lessons.map(l=>l.id)]){
-    await page.locator('#lesson-nav a[href="#'+id+'"]').click();await page.locator('h1').filter({hasText:id==='home'?'От первого сигнала к своей сети':course.lessons.find(l=>l.id===id).title}).waitFor();
+   for(const id of ['home','graph-lab',...course.lessons.map(l=>l.id)]){
+    await page.locator('aside a[href="#'+id+'"]').click();await page.locator('h1').filter({hasText:id==='home'?'От первого сигнала к своей сети':id==='graph-lab'?'Лаборатория графов':course.lessons.find(l=>l.id===id).title}).waitFor();
     check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-    await page.waitForFunction(()=>Array.from(document.querySelectorAll('main img')).every(i=>i.complete));check(await page.locator('main img').evaluateAll(images=>images.every(i=>i.naturalWidth>0)),true);
+    await page.waitForFunction(()=>Array.from(document.querySelectorAll('main img')).every(i=>i.complete));check(await page.locator('main img').evaluateAll(images=>images.every(i=>i.naturalWidth>0)),true);check(await page.locator('main img').evaluateAll(images=>images.every(i=>Math.abs(i.clientWidth/i.clientHeight-i.naturalWidth/i.naturalHeight)<.01)),true);
+    if(id!=='graph-lab')check(await page.locator('#lab').count(),0);
    }
   }
+  for(const width of [360,1440]){await page.setViewportSize({width,height:1000});for(const id of ['java-01','graph-lab']){await page.goto(base+'/java/#'+id);await page.locator('h1').waitFor();if(id==='java-01')await page.locator('.lesson-diagram').scrollIntoViewIfNeeded();else await page.locator('#lab').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,id+'-'+width+'.png')});}}
   await page.setViewportSize({width:1440,height:1000});await page.locator('#lesson-nav a[href="#home"]').click();await page.locator('h1').filter({hasText:'От первого сигнала к своей сети'}).waitFor();await page.screenshot({path:path.join(out,'home-desktop.png')});
   await page.setViewportSize({width:360,height:800});await page.screenshot({path:path.join(out,'home-mobile.png')});
   await page.locator('#lesson-nav a[href="#java-01"]').click();await page.reload();await page.keyboard.press('Tab');check(await page.locator('.skip').evaluate(e=>e===document.activeElement),true);await page.keyboard.press('Enter');check(await page.locator('main').evaluate(e=>e===document.activeElement),true);check(new URL(page.url()).hash,'#java-01');

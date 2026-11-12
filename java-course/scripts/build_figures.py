@@ -13,7 +13,10 @@ def build(name,dark):
     def arrow(a,b,label=''):
         x,y=a;xx,yy=b;d.line((x,y,xx,yy),fill=line,width=5);angle=math.atan2(yy-y,xx-x)
         d.polygon([(xx,yy),(xx-21*math.cos(angle-.45),yy-21*math.sin(angle-.45)),(xx-21*math.cos(angle+.45),yy-21*math.sin(angle+.45))],fill=line)
-        if label:text((x+xx)/2+12,(y+yy)/2-38,label,32,accent)
+        if label:
+            font=ImageFont.truetype(FONT,32);bounds=d.textbbox((0,0),label,font=font)
+            if abs(xx-x)<abs(yy-y)/4:text((x+xx)/2+24,(y+yy)/2-20,label,32,accent)
+            else:text((x+xx)/2-(bounds[2]-bounds[0])/2,(y+yy)/2-43,label,32,accent)
     def node(x,y,label):
         d.ellipse((x-52,y-52,x+52,y+52),fill=bg,outline=accent,width=4);box=d.textbbox((0,0),label,font=ImageFont.truetype(FONT,38));text(x-(box[2]-box[0])/2,y-23,label,38)
     def box(x,y,w,h,label):
@@ -22,7 +25,7 @@ def build(name,dark):
     text(65,45,titles[name],45)
     if name=='pipeline':
         for x,label in [(75,'Main.java'),(620,'Main.class'),(1160,'stdout')]:box(x,290,330,140,label)
-        arrow((410,360),(610,360),'javac');arrow((955,360),(1150,360),'java')
+        arrow((405,360),(620,360),'javac');arrow((950,360),(1160,360),'java')
         text(90,545,'Компилятор проверяет типы и структуру программы.',36)
         text(90,610,'JVM выполняет main. Результат сверяем с прогнозом.',36)
         text(90,735,'javac -encoding UTF-8 Main.java     →     java Main',32,accent)
@@ -59,9 +62,9 @@ def build(name,dark):
         text(90,660,'AA → cur = 1, поскольку текущее A остаётся допустимым.',36)
         text(90,735,'Самый длинный участок ACABA: 5 символов.',36,accent)
     elif name=='dag':
-        for i in range(6):arrow((140+i*215,430),(250+i*215,430),'+1')
+        for i in range(6):arrow((142+i*215,430),(253+i*215,430),'+1')
         for i in range(5):
-            x=90+i*215;points=[(x+15+400*t/30,375-135*math.sin(math.pi*t/30)) for t in range(31)];d.line(points,fill=line,width=4);arrow(points[-2],points[-1]);text(x+170,202,'+2',30,accent)
+            x=90+i*215;points=[(x+430*t/30,378-135*math.sin(math.pi*t/30)) for t in range(31)];d.line(points,fill=line,width=4);arrow(points[-2],points[-1]);text(x+170,202,'+2',30,accent)
         for i,value in enumerate([1,1,2,3,5,8,13]):node(90+i*215,430,str(i));text(70+i*215,540,str(value),39,accent)
         text(85,650,'dp[0] = 1;  dp[i] = dp[i−1] + dp[i−2]',40)
         text(85,745,'Нижняя строка — число путей в каждую вершину.',34)
@@ -72,18 +75,19 @@ def build(name,dark):
         for a,b,value in edges:
             x,y=pts[a];xx,yy=pts[b]
             if a=='A' and b=='D':
-                d.line([(x,y-57),(x,155),(xx,155),(xx,yy-90)],fill=line,width=5);arrow((xx,yy-90),(xx,yy-61));text(800,112,value,32,accent);continue
+                d.line([(x,y-52),(x,155),(xx,155),(xx,yy-90)],fill=line,width=5);arrow((xx,yy-90),(xx,yy-52));text(800,112,value,32,accent);continue
             length=math.hypot(xx-x,yy-y);ux,uy=(xx-x)/length,(yy-y)/length
-            arrow((x+57*ux,y+57*uy),(xx-61*ux,yy-61*uy),value)
+            arrow((x+52*ux,y+52*uy),(xx-52*ux,yy-52*uy),value)
         for label,(x,y) in pts.items():node(x,y,label)
         text(85,805,'A → C → B → D: 2 + 1 + 3 = 6' if name=='weighted' else 'Слои BFS:  {A} → {B, C} → {D}. Все рёбра стоят один переход.',34,accent)
     elif name=='contract':
-        box(70,220,380,125,'Строка "12"');arrow((450,280),(630,280));box(650,220,385,125,'Формат 1–99');arrow((1035,280),(1190,280));box(1210,220,300,125,'Расчёт')
-        arrow((840,350),(840,560));box(610,580,570,125,'Ошибка → ответ 400')
+        box(70,220,380,125,'Строка "12"');arrow((450,280),(650,280));box(650,220,385,125,'Формат 1–99');arrow((1035,280),(1210,280));box(1210,220,300,125,'Расчёт')
+        arrow((840,345),(840,580),'ошибка');box(610,580,570,125,'Ошибка → ответ 400')
         text(70,755,'"0", "−5", "100", "01" отклоняются до вычисления маршрута.',34)
     elif name=='http':
-        for x,label in [(65,'Браузер'),(620,'Java HTTP'),(1170,'Алгоритм')]:box(x,260,320,140,label)
-        arrow((390,300),(610,300),'GET');arrow((945,300),(1160,300),'w');arrow((1160,425),(945,425),'Route');arrow((610,485),(390,485),'JSON')
+        for x,label in [(65,'Браузер'),(620,'Java HTTP'),(1170,'Алгоритм')]:box(x,250,320,240,label)
+        arrow((385,350),(620,350),'GET');arrow((940,350),(1170,350),'w')
+        arrow((1170,450),(940,450),'Route');arrow((620,450),(385,450),'JSON')
         text(85,630,'/route?w=1 → проверка → cost: 6, path: A-C-B-D',36)
         text(85,725,'Сервер слушает только 127.0.0.1:8090.',36,accent)
     target=(DARK if dark else PRINT)/(name+'.png');im.save(target)

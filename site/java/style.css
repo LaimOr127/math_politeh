@@ -2,3 +2,6 @@
 .rail nav a:first-child{grid-template-columns:1fr}
 
 main > figure{margin:24px 0}main > figure > a{display:inline-block;margin-top:10px;font-size:14px}
+
+.lesson-diagram{display:block;width:100%;height:auto;max-width:1100px;margin:15px auto}
+.practice-title{margin-top:24px;padding-top:20px;border-top:1px solid #33485b}

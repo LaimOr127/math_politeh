@@ -1,7 +1,7 @@
 {
   "lesson-01-presentation.pptx": {
-    "bytes": 121355,
-    "sha256": "ef9482c9b7e63c23f453e64c2f8c3119004f5f692e1f777c72911a27efb5ad4a"
+    "bytes": 121397,
+    "sha256": "8ea9ec29a26e7d7fe99e83db8436f0dd896306f5cc697b78d4e3ff36e7b3fda1"
   },
   "lesson-01-teacher-script.docx": {
     "bytes": 43531,
@@ -40,51 +40,51 @@
     "sha256": "9cbde188cea2b85c65e3fbd57c1b6ed88b8578d70182884db475093d52ece295"
   },
   "lesson-06-presentation.pptx": {
-    "bytes": 115561,
-    "sha256": "6b1b6f0707a2e33c327244140f4ef5dfe2401bfc4dd279fe527b97fd3e5a2e7c"
+    "bytes": 115845,
+    "sha256": "e456083f6098635e15e0dae3dd8addce2f1ff8927fb97309c218229839d4a70a"
   },
   "lesson-06-teacher-script.docx": {
     "bytes": 43259,
     "sha256": "2f1fa8017c26010a85b73ccd71dd620a911dc0a2b6a35691bcba461659b1abff"
   },
   "lesson-07-presentation.pptx": {
-    "bytes": 109221,
-    "sha256": "8134a9f55e4b625deed73f43d64736743bba2750d9dbda113d257c51e0334b95"
+    "bytes": 109338,
+    "sha256": "711a2a12e31da9da6803c3de81a20a28c5a1caeec1a80248ad3657629fda87f9"
   },
   "lesson-07-teacher-script.docx": {
     "bytes": 43473,
     "sha256": "e64aa9717b58db742eba3637f3b44469a4f090d8005c44fbbc689b3b15fa6d4d"
   },
   "lesson-08-presentation.pptx": {
-    "bytes": 110672,
-    "sha256": "1da5c6e66ad84efadf6240950698a8d720be6ed342620066d7d08f4c79b12506"
+    "bytes": 110699,
+    "sha256": "f3c14cd07c9103891643c30cd44121d9242582f9e970767465ddfa3448a2b30b"
   },
   "lesson-08-teacher-script.docx": {
     "bytes": 43583,
     "sha256": "1b4fb9ff704b0b10a06626a10293d3a04453980ae8d4ee508af1b4e58b4869c6"
   },
   "lesson-09-presentation.pptx": {
-    "bytes": 113343,
-    "sha256": "1b0dfee80658611d36a245d34c67bc6b0e4cc8e9e40a1812a413ff3183f0728a"
+    "bytes": 116167,
+    "sha256": "f70ff87cf6bc82e1a5f02115bb57cddb5ef5e390e637e28dfdfcef13d001c91d"
   },
   "lesson-09-teacher-script.docx": {
     "bytes": 43847,
     "sha256": "a5dc4a3e15382943b95175ded4a257026158e29980cb69eb6c9a7fc952ea1b84"
   },
   "lesson-10-presentation.pptx": {
-    "bytes": 124708,
-    "sha256": "4b662247ba79afa31c2a9c7711cf788b093a0131881d3d623888b38d531fa3cc"
+    "bytes": 124719,
+    "sha256": "fa594b539d0b070e5a61e9914861a49879da2f09bd981af46f7b8b679e904ac3"
   },
   "lesson-10-teacher-script.docx": {
     "bytes": 43724,
     "sha256": "be74c13e245dcaf8eebbe56d502bc1e3d73259260de350c391f14fc1a3f206f8"
   },
   "scientific-methodical-guide.docx": {
-    "bytes": 500834,
-    "sha256": "102fb4267afceac7229e578fc7a68c8aed612582f596daa887c4a89d943afd0a"
+    "bytes": 503936,
+    "sha256": "45097c8729222260f2e474f6ca4d82c83f1b2950b32beee6c0f1d96c12a9d4e8"
   },
   "java-course-materials.zip": {
-    "bytes": 1956424,
-    "sha256": "612a1b19f2c78e82dd5f4e717ac3ec479de97fcda79446a5fc28e643787f426b"
+    "bytes": 1963135,
+    "sha256": "3aa61bf8230c1f78c493983104e369095b69d5905050c7a0a48acf6d03c543eb"
   }
 }

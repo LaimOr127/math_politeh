@@ -1,5 +1,5 @@
 """Validate all Java Office artifacts against their canonical content using stdlib only."""
-import json,re,zipfile,hashlib
+import json,re,zipfile,hashlib,posixpath
 from pathlib import Path
 from xml.etree import ElementTree as E
 ROOT=Path(__file__).resolve().parents[2]
@@ -22,6 +22,10 @@ def verify():
         section=body.find('.//'+W+'sectPr');margins=section.find(W+'pgMar')
         assert margins.get(W+'left')=='1701' and margins.get(W+'right')=='850'
         assert len(guide.namelist())>15
+        guide_media={hashlib.sha256(guide.read(n)).hexdigest() for n in guide.namelist() if n.startswith('word/media/')}
+        for name in [lesson['diagram'] for lesson in C['lessons']]+['project-screen']:
+            expected=hashlib.sha256((ROOT/'java-course/illustrations'/f'{name}.png').read_bytes()).hexdigest()
+            assert expected in guide_media,('Stale or missing guide diagram',name)
         links=[link for link in body.findall('.//'+W+'hyperlink') if (link.get(W+'anchor') or '').startswith('_course_body_')]
         assert len(links)>=20,'Materialise linked contents after rendering'
         for link in links:
@@ -47,6 +51,15 @@ def verify():
                 assert norm(s['teacher']) in full
                 xml=z.read(f'ppt/slides/slide{j}.xml')
                 if not s.get('diagram'):assert b'<p:timing' in xml
+                else:
+                    slide=E.fromstring(xml)
+                    blip=slide.find('.//'+A+'blip')
+                    embed=blip.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
+                    relations=E.fromstring(z.read(f'ppt/slides/_rels/slide{j}.xml.rels'))
+                    target=next(r.get('Target') for r in relations if r.get('Id')==embed)
+                    media_path=target.lstrip('/') if target.startswith('/') else posixpath.normpath('ppt/slides/'+target)
+                    expected=(ROOT/'site/java/figures'/f'{s["diagram"]}.png').read_bytes()
+                    assert z.read(media_path)==expected,('Stale slide diagram',i,j)
     for filename in ('RoutePlanner.java','RoutePlannerTest.java','Main.java'):
         assert norm((ROOT/'java-course/project'/filename).read_text(encoding='utf-8')) in full
     archive=OUT/'java-course-materials.zip'
