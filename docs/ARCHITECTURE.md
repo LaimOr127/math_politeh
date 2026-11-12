@@ -12,6 +12,9 @@ lessons/content/lesson-XX.json
   ├── create_presentations.mjs → PPTX
   └── build_documents.py → DOCX
 
+build_illustrations.py → lessons/illustrations → сводный DOCX
+отрисовка DOCX → update_scientific_contents.py → содержание с реальными страницами
+
 course.js → domain/Mission.js → ui/app.js
                    └────────── storage/ProgressStore.js
                                   ├── ProgressStore

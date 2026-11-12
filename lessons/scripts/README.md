@@ -33,6 +33,23 @@ python lessons/scripts/build_documents.py
 
 Создаются восемь `lesson-XX-teacher-script.docx`, `new-learning-guide.docx` и `scientific-methodical-guide.docx`. Сценарии включают все этапы, речь преподавателя, вопросы и решения. Сводное пособие содержит методику, архитектуру, восемь тем, общие программы, ключи вопросов и планирование.
 
+Сводный документ также включает полные сценарии всех 144 слайдов и 11 авторских схем. Иллюстрации создаются `build_illustrations.py` через Pillow из Codex runtime; результат сохраняется в `lessons/illustrations/` и включается в Git. Веб-серверу эти зависимости не нужны. Режим `--scientific-only` пересобирает только общее пособие, сохраняя остальные девять Word-файлов.
+
+Для общего документа заданы A4, поля 30/15/20/20 мм, Times New Roman 14 pt, полуторный интервал, абзац 1,25 см, сквозные номера снизу по центру и титульная страница без печатного номера. Используются нумерованные рисунки и таблицы, приложения и список источников. Требования ГОСТ 7.32–2017 применены к структуре и оформлению пособия; конкретный титульный лист вуза адаптируется при наличии его реквизитов.
+
+Содержание — поле Word TOC с внутренними ссылками и сохранёнными номерами страниц. Для его актуализации используется **реальная отрисовка**, а не оценка объёма текста:
+
+```sh
+python lessons/scripts/build_documents.py --scientific-only
+python "$DOCUMENTS_SKILL_DIR/render_docx.py" lessons/output/scientific-methodical-guide.docx --output_dir .build/scientific-review/draft --emit_pdf
+python lessons/scripts/update_scientific_contents.py .build/scientific-review/draft/scientific-methodical-guide.pdf
+python "$DOCUMENTS_SKILL_DIR/render_docx.py" lessons/output/scientific-methodical-guide.docx --output_dir .build/scientific-review/final --emit_pdf
+python lessons/scripts/update_scientific_contents.py .build/scientific-review/final/scientific-methodical-guide.pdf --check
+python lessons/scripts/package_materials.py
+```
+
+`DOCUMENTS_SKILL_DIR` обозначает каталог установленного навыка Documents. Команды выполняются Python из Codex runtime; для обновления содержания нужен входящий в этот runtime `pdfplumber`. На Windows синтаксис обращения к переменным окружения отличается от примера sh. Если проверка пагинации не прошла, повторите материализацию и отрисовку. Все страницы и иллюстрации проверяются визуально перед публикацией.
+
 Перед авторством файлов в среде Codex выполните маркер операции из соответствующего навыка. После сборки каждый DOCX проверяется `render_docx.py` навыка Documents. На Windows нужны установленные LibreOffice и Poppler из Codex runtime в PATH. PNG и PDF проверки не являются отдельными публикациями.
 
 `python lessons/scripts/verify_materials.py` сверяет содержимое всех опубликованных файлов с источниками. `python lessons/scripts/package_materials.py` после проверки собирает 18 файлов в `lessons/python-course-materials.zip`.
