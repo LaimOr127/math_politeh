@@ -2,8 +2,11 @@
   "name": "python-lab-course",
   "private": true,
   "type": "module",
+  "engines": { "node": ">=22" },
   "scripts": {
-    "test": "node --test site/tests/*.test.js",
-    "check": "npm run test"
+    "start": "node server/index.js",
+    "test": "node --test site/tests/*.test.js server/tests/*.test.js",
+    "sync:site": "node lessons/scripts/sync_site.mjs",
+    "check": "node lessons/scripts/sync_site.mjs --check && npm run test"
   }
 }

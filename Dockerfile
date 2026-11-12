@@ -1,8 +1,14 @@
-FROM nginx:1.30.6-alpine
+FROM node:24-alpine
 
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY site/ /usr/share/nginx/html/site/
-COPY lessons/output/ /usr/share/nginx/html/lessons/output/
-RUN chmod -R a+rX /usr/share/nginx/html/site /usr/share/nginx/html/lessons/output
+WORKDIR /app
+COPY package.json ./
+COPY server/ ./server/
+COPY site/ ./site/
+COPY teacher/ ./teacher/
+COPY lessons/output/ ./lessons/output/
+ENV NODE_ENV=production PORT=8080
+USER node
 
-EXPOSE 80
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s CMD node -e "fetch('http://127.0.0.1:8080/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+CMD ["node", "server/index.js"]

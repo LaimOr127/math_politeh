@@ -10,7 +10,7 @@ const python=process.env.RUNTIME_PYTHON;
 if(!skill||!python) throw Error('Set PRESENTATIONS_SKILL_DIR and RUNTIME_PYTHON; see lessons/scripts/README.md.');
 const {finalizePresentation}=await import(pathToFileURL(path.join(skill,'container_tools/artifact_tool_utils.mjs')));
 const stamp=Date.now().toString();
-const COLOR={ink:'#18343A',accent:'#176B6A',paper:'#FAFAF4',muted:'#52686C',code:'#142C35'};
+const COLOR={ink:'#F7F1FF',accent:'#CEAEFA',paper:'#171226',muted:'#BCACCF',code:'#271E3A'};
 function text(slide,value,x,y,w,h,size=27,color=COLOR.ink,name='',font='Arial'){
  const shape=slide.shapes.add({geometry:'textbox',name,position:{left:x,top:y,width:w,height:h},fill:'none',line:{fill:'none',width:0}});
  shape.text=value; shape.text.style={fontFamily:font,fontSize:size,color}; return shape;
@@ -23,31 +23,31 @@ async function build(lesson){
  let elapsed=0;
  lesson.slides.forEach((data,index)=>{
   const slide=p.slides.add();slide.background.fill=COLOR.paper;
-  text(slide,`Урок ${Number(lesson.id)}   ${elapsed}–${elapsed+data.minutes} мин`,56,24,1130,26,16,COLOR.muted);
-  text(slide,data.title,56,70,1168,96,data.title.length>60?34:40);
+  text(slide,`МИССИЯ ${lesson.id}   ·   ${elapsed}–${elapsed+data.minutes} мин`,56,24,1130,26,17,COLOR.muted);
+  text(slide,data.title,56,78,1168,88,data.title.length>60?38:44);
   const code=data.code;
   const visual=index===0;
   if(code){
    const count=code.split('\n').length;
    const longest=Math.max(...code.split('\n').map(x=>x.length));
-   const size=Math.min(31,Math.floor(290/Math.max(count,1)),Math.floor(660/(Math.max(longest,1)*.61)));
-   rect(slide,56,174,700,340,COLOR.code);
-   text(slide,code,76,194,660,300,Math.max(17,size),'#F7FAEF','Code','Consolas');
-   text(slide,data.body.join('\n\n'),790,174,432,340,24);
+   const size=Math.min(32,Math.floor(275/Math.max(count,1)),Math.floor(700/(Math.max(longest,1)*.61)));
+   rect(slide,56,184,750,320,COLOR.code);
+   text(slide,code,80,208,702,272,Math.max(22,size),'#F7F1FF','Code','Consolas');
+   text(slide,data.body.join('\n\n'),842,184,382,320,25);
   }else if(visual){
-   text(slide,data.body.join('\n\n'),56,174,600,340,27);
+   text(slide,data.body.join('\n\n'),56,184,600,320,30);
    slide.images.add({blob:illustration,contentType:'image/png',alt:'Пытик, робот-помощник',fit:'contain',position:{left:690,top:174,width:534,height:340}});
   }else{
    data.body.forEach((line,i)=>{
-    text(slide,String(i+1).padStart(2,'0'),56,177+i*85,60,45,24,COLOR.accent);
-    text(slide,line,135,174+i*85,1060,80,28);
+    text(slide,String(i+1).padStart(2,'0'),56,187+i*96,60,45,22,COLOR.accent);
+    text(slide,line,135,184+i*96,1060,86,30);
    });
   }
   const prompt=data.question||'Что получилось?';
-  text(slide,prompt,56,535,1168,54,prompt.length>110?22:26,COLOR.accent);
-  const reveal=data.output?`Результат: ${data.output.trimEnd()}`:`Ответ: ${data.answer}`;
-  const revealLines=reveal.split('\n').length;
-  text(slide,reveal,56,590,1168,100,revealLines>4?16:revealLines>2||reveal.length>210?18:22,COLOR.ink,data.animation?'reveal-answer':'answer');
+  text(slide,prompt,56,532,1168,56,prompt.length>110?24:28,COLOR.accent);
+  const output=data.output?.trimEnd();
+  const reveal=data.answer + (output && output !== data.answer.trim() ? `\nРезультат примера: ${output.split('\n').join(' / ')}` : '');
+  text(slide,reveal,56,592,1168,95,24,COLOR.ink,data.animation?'reveal-answer':'answer');
   text(slide,`${index+1} / ${lesson.slides.length}`,1140,688,85,20,13,COLOR.muted);
   slide.speakerNotes.text=[`Слайд ${index+1}. ${elapsed}–${elapsed+data.minutes} мин (${data.minutes} мин)`,data.teacher,`Действия: ${data.action}`,`Вопрос: ${data.question}`,`Ожидаемый ответ: ${data.answer}`,data.animation?'Анимация: один щелчок открывает нижний блок ответа или результата. До щелчка выслушайте предположения.':'Анимации нет.'].join('\n\n');
   elapsed+=data.minutes;
@@ -68,6 +68,7 @@ async function build(lesson){
  }
  console.log(`Validated candidate for review: ${checked}`);
  console.log(`Lesson ${lesson.id}: ${lesson.slides.length} slides, 45 minutes.`);
+ await fs.copyFile(checked,path.join(ROOT,`lessons/output/lesson-${lesson.id}-presentation.pptx`));
 }
 const files=(await fs.readdir(path.join(ROOT,'lessons/content'))).filter(x=>/^lesson-\d\d\.json$/.test(x)).sort();
 if(!files.length)throw Error('No lesson JSON files found.');

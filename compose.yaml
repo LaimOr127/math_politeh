@@ -2,5 +2,9 @@ services:
   site:
     build: .
     ports:
-      - "${PORT:-8080}:80"
+      - "${PORT:-8080}:8080"
+    environment:
+      TEACHER_CODES: "${TEACHER_CODES:-lesson}"
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
+      PUBLIC_ORIGIN: "${PUBLIC_ORIGIN:-}"
     restart: unless-stopped

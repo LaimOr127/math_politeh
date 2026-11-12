@@ -1,13 +1,14 @@
 import { courseLessons } from '../data/course.js';
 import { Mission, nextMission } from '../domain/Mission.js';
 import { ProgressStore } from '../storage/ProgressStore.js';
+import { applyTheme, preferences } from './theme.js';
 
 const missions = courseLessons.map(definition => new Mission(definition));
 const store = new ProgressStore(() => window.localStorage, missions);
 const app = document.querySelector('#app');
 let snapshot = store.load();
 let introStep = 0;
-let introOpen = true;
+let introOpen = !preferences.load().introSeen;
 let exerciseIndex = 0;
 let feedback = null;
 
@@ -32,14 +33,14 @@ function status(mission) {
 /** @returns {string} Course map and progress. */
 function home() {
   const next = nextMission(missions, snapshot.completedIds);
-  return `<section class="hero-home"><div><p class="eyebrow">Python для 5–6 классов</p><h1>Привет! Я Пытик.</h1><p class="lead">Давай научимся понимать Python и соберём робота по деталям. Впереди восемь небольших уроков, примеры и задания.</p><a class="primary-button" href="#lesson/${escapeHtml(next.id)}">${snapshot.stars ? 'Продолжить обучение' : 'Начать первый урок'} <span aria-hidden="true">→</span></a><button class="text-button" data-action="intro">Как здесь всё устроено?</button></div><img src="assets/pytik-mascot.png" class="home-mascot" alt="Пытик — робот-помощник с карточкой кода"></section>
-    <section class="progress-panel"><div><p class="eyebrow">Твоя мастерская</p><h2>${snapshot.stars === missions.length ? 'Пытик собран!' : 'Собираем Пытика вместе'}</h2><p>За каждый пройденный тест ты получишь одну деталь. Собрано ${snapshot.stars} из ${missions.length}.</p><progress max="${missions.length}" value="${snapshot.stars}" aria-label="Собрано деталей">${snapshot.stars} из ${missions.length}</progress></div><div class="parts" aria-label="Детали робота">${missions.map((m,i) => `<span class="part ${snapshot.completedIds.includes(m.id) ? 'earned' : ''}" title="${escapeHtml(m.title)}">${snapshot.completedIds.includes(m.id) ? '✓' : i+1}</span>`).join('')}</div></section>
-    <section class="course-map"><div class="section-header"><div><p class="eyebrow">Путь исследователя</p><h2>Карта уроков</h2></div><span>8 шагов к первой программе</span></div><ol class="course-list">${missions.map((m,i) => `<li class="course-card ${unlocked(m) ? '' : 'locked'}"><span class="course-number">${String(i+1).padStart(2,'0')}</span><div><p class="course-status">${status(m)}</p><h3>${escapeHtml(m.title)}</h3><p>${escapeHtml(m.goal)}</p>${unlocked(m) ? `<a href="#lesson/${escapeHtml(m.id)}">Открыть урок →</a>` : '<span class="locked-label">Сначала пройди предыдущий урок</span>'}</div></li>`).join('')}</ol></section>`;
+  return `<section class="hero-home"><div><p class="eyebrow">Python для 5–6 классов</p><span class="orbit-label">8 МИССИЙ · ОДИН БОЛЬШОЙ СТАРТ</span><h1>Твой первый код.<br><em>Вселенная открытий.</em></h1><p class="lead">Привет, я Пытик! Отправимся в путешествие по Python: напишем первые программы, соберём робота и создадим свою игру.</p><a class="primary-button" href="#lesson/${escapeHtml(next.id)}">${snapshot.stars ? 'Продолжить обучение' : 'Начать первый урок'} <span aria-hidden="true">→</span></a><button class="text-button" data-action="intro">Как здесь всё устроено?</button></div><div class="hero-universe" aria-label="Пытик на учебной орбите"><span class="orbit orbit-one" aria-hidden="true"></span><span class="orbit orbit-two" aria-hidden="true"></span><span class="planet" aria-hidden="true"></span><span class="space-star star-one" aria-hidden="true">✦</span><span class="space-star star-two" aria-hidden="true">✧</span><img src="assets/pytik-mascot.png" class="home-mascot" alt="Пытик — робот-помощник с карточкой кода"><span class="code-satellite" aria-hidden="true">print("Поехали!")</span></div></section>
+    <section class="progress-panel"><div><p class="eyebrow">Бортовой журнал</p><h2>${snapshot.stars === missions.length ? 'Пытик собран!' : 'Собираем Пытика вместе'}</h2><p>За каждый пройденный тест ты получишь одну деталь. Собрано ${snapshot.stars} из ${missions.length}.</p><progress max="${missions.length}" value="${snapshot.stars}" aria-label="Собрано деталей">${snapshot.stars} из ${missions.length}</progress></div><div class="parts" aria-label="Детали робота">${missions.map((m,i) => `<span class="part ${snapshot.completedIds.includes(m.id) ? 'earned' : ''}" title="${escapeHtml(m.title)}">${snapshot.completedIds.includes(m.id) ? '✓' : i+1}</span>`).join('')}</div></section>
+    <section class="course-map"><div class="section-header"><div><p class="eyebrow">Путь исследователя</p><h2>Карта миссий</h2></div><span>От первого сообщения до собственной игры</span></div><ol class="course-list">${missions.map((m,i) => `<li class="course-card ${unlocked(m) ? '' : 'locked'}"><span class="course-number">${String(i+1).padStart(2,'0')}</span><div><p class="course-status">${status(m)}</p><h3>${escapeHtml(m.title)}</h3><p>${escapeHtml(m.goal)}</p>${unlocked(m) ? `<a href="#lesson/${escapeHtml(m.id)}">Открыть урок →</a>` : '<span class="locked-label">Сначала пройди предыдущий урок</span>'}</div></li>`).join('')}</ol></section>`;
 }
 /** @param {Mission} mission Available lesson. @returns {string} Full reading and test link. */
 function lesson(mission) {
   const index = missions.indexOf(mission);
-  return `<article class="reading"><a class="back-link" href="#home">← Карта уроков</a><header class="reading-header"><p class="eyebrow">Урок ${index+1} из ${missions.length} · ${escapeHtml(mission.concept)}</p><h1>${escapeHtml(mission.title)}</h1><p class="lead">${escapeHtml(mission.goal)}</p></header><div class="reading-layout"><aside class="reading-aside"><img src="assets/pytik-mascot.png" alt="" width="110"><p><strong>Пытик подсказывает</strong></p><p>Читай по порядку и запускай примеры в VS Code. Ошибаться можно — это часть обучения!</p><a href="#test/${escapeHtml(mission.id)}">Перейти к проверке ↓</a></aside><div class="reading-sections">${mission.sections.map((s,i) => `<section class="reading-section"><p class="section-index">${String(i+1).padStart(2,'0')}</p><h2>${escapeHtml(s.title)}</h2>${s.paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('')}${s.code ? `<figure><figcaption>Пример Python</figcaption><pre><code>${escapeHtml(s.code)}</code></pre></figure>` : ''}${s.output ? `<figure class="output"><figcaption>Результат</figcaption><pre><code>${escapeHtml(s.output)}</code></pre></figure>` : ''}</section>`).join('')}<section class="ready-card"><h2>Готов проверить себя?</h2><p>В тесте три задания. Если ошибёшься, Пытик поможет подсказкой.</p><a class="primary-button" href="#test/${escapeHtml(mission.id)}">Перейти к тесту →</a></section></div></div></article>`;
+  return `<article class="reading"><a class="back-link" href="#home">← Карта миссий</a><header class="reading-header"><p class="eyebrow">Урок ${index+1} из ${missions.length} · ${escapeHtml(mission.concept)}</p><h1>${escapeHtml(mission.title)}</h1><p class="lead">${escapeHtml(mission.goal)}</p></header><div class="reading-layout"><aside class="reading-aside"><img src="assets/pytik-mascot.png" alt="" width="110"><p><strong>Пытик подсказывает</strong></p><p>Читай по порядку и запускай примеры в VS Code. Ошибаться можно — это часть обучения!</p><a href="#test/${escapeHtml(mission.id)}">Перейти к проверке ↓</a></aside><div class="reading-sections">${mission.sections.map((s,i) => `<section class="reading-section"><p class="section-index">${String(i+1).padStart(2,'0')}</p><h2>${escapeHtml(s.title)}</h2>${s.paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('')}${s.code ? `<figure><figcaption>Пример Python</figcaption><pre><code>${escapeHtml(s.code)}</code></pre></figure>` : ''}${s.output ? `<figure class="output"><figcaption>Результат</figcaption><pre><code>${escapeHtml(s.output)}</code></pre></figure>` : ''}</section>`).join('')}<section class="ready-card"><h2>Готов проверить себя?</h2><p>В тесте три задания. Если ошибёшься, Пытик поможет подсказкой.</p><a class="primary-button" href="#test/${escapeHtml(mission.id)}">Перейти к тесту →</a></section></div></div></article>`;
 }
 /** @param {Mission} mission Available lesson. @returns {string} Current question and feedback. */
 function test(mission) {
@@ -51,7 +52,7 @@ function test(mission) {
 }
 /** @returns {string} Entry point to the password-protected teacher section. */
 function materials() {
-  return `<section class="materials-page"><a class="back-link" href="#home">← Карта уроков</a><p class="eyebrow">Для преподавателя</p><h1>Кабинет преподавателя</h1><p class="lead">Учебные файлы находятся в закрытом разделе. Для входа потребуется имя пользователя и пароль.</p><p><a class="primary-button" href="../teacher/">Войти в кабинет →</a></p></section>`;
+  return `<section class="materials-page"><a class="back-link" href="#home">← Карта миссий</a><p class="eyebrow">Для преподавателя</p><h1>Кабинет преподавателя</h1><p class="lead">Учебные файлы находятся в закрытом разделе. Для входа потребуется код преподавателя или кодовое слово.</p><p><a class="primary-button" href="../teacher/">Войти в кабинет →</a></p></section>`;
 }
 const intro = [
   ['Привет, я Пытик!', 'Я помогу тебе освоить Python. В мастерской ты будешь читать уроки, писать код в VS Code и получать детали для моего робота.'],
@@ -73,7 +74,10 @@ function render() {
   else if (['lesson','test'].includes(current.page) && current.mission && unlocked(current.mission)) content=current.page==='lesson' ? lesson(current.mission) : test(current.mission);
   else if (['lesson','test'].includes(current.page)) content='<section class="empty-page"><h1>Этот урок пока закрыт</h1><p>Сначала пройди предыдущий урок на карте.</p><a href="#home">Вернуться к карте</a></section>';
   else content=home();
-  app.innerHTML=`<a class="skip-link" href="#content">К содержимому</a><header class="topbar"><a class="brand" href="#home"><span class="brand-mark">P</span> Лаборатория Питона</a><nav class="main-nav" aria-label="Главное меню"><a href="#home">Уроки</a><a href="../teacher/">Преподавателю</a><button class="text-button" data-action="intro">Помощь</button></nav><span class="score">★ ${snapshot.stars} / ${missions.length}</span></header><main id="content" tabindex="-1"><div class="storage-notice" role="status" ${store.persistent?'hidden':''}>Браузер не разрешил сохранить прогресс. Продолжать можно, но при перезагрузке новые результаты могут потеряться.</div>${content}</main><footer><span>Лаборатория Питона · учимся шаг за шагом</span><button class="text-button" data-action="reset">Сбросить прогресс</button></footer>${guide()}`;
+  document.querySelector('#content')?.removeAttribute('inert');
+  app.innerHTML=`<a class="skip-link" href="#content">К содержимому</a><header class="topbar"><a class="brand" href="#home"><span class="brand-mark">P</span><span>Лаборатория Питона<small>Учимся открывать новое</small></span></a><nav class="main-nav" aria-label="Главное меню"><a href="#home">Уроки</a><a href="../teacher/">Преподавателю</a><button class="text-button" data-action="intro">Помощь</button></nav><span class="score" aria-label="Пройдено миссий: ${snapshot.stars} из ${missions.length}">✦ ${snapshot.stars} / ${missions.length}</span><button class="theme-button" data-action="theme" type="button">Сменить тему</button></header><main id="content" tabindex="-1"><div class="storage-notice" role="status" ${store.persistent?'hidden':''}>Браузер не разрешил сохранить прогресс. Продолжать можно, но при перезагрузке новые результаты могут потеряться.</div>${content}</main><footer><span>Лаборатория Питона · учимся шаг за шагом</span><button class="text-button" data-action="reset">Сбросить прогресс</button></footer>${guide()}`;
+  for (const node of app.querySelectorAll('.topbar, main, footer')) node.inert = introOpen;
+  applyTheme();
 }
 /** @param {Mission} mission Current mission. Restore first unsolved question. */
 function resumeExercise(mission) {
@@ -93,8 +97,8 @@ app.addEventListener('click', event => {
   if (!button || button.disabled) return;
   const action=button.dataset.action;
   if (action==='intro') { introStep=0; introOpen=true; render(); document.querySelector('.guide-close')?.focus(); }
-  if (action==='skip-intro') { introOpen=false; render(); document.querySelector('[data-action="intro"]')?.focus(); }
-  if (action==='next-intro') { if (introStep < intro.length-1) introStep++; else introOpen=false; render(); document.querySelector(introOpen?'[data-action="next-intro"]':'[data-action="intro"]')?.focus(); }
+  if (action==='skip-intro') { preferences.dismissIntro(); introOpen=false; render(); document.querySelector('[data-action="intro"]')?.focus(); }
+  if (action==='next-intro') { if (introStep < intro.length-1) introStep++; else { introOpen=false; preferences.dismissIntro(); } render(); document.querySelector(introOpen?'[data-action="next-intro"]':'[data-action="intro"]')?.focus(); }
   if (action==='reset' && window.confirm('Стереть весь прогресс в этом браузере?')) { snapshot=store.reset(); feedback=null; location.hash='#home'; render(); }
   const current=route();
   if (current.page!=='test' || !current.mission || !unlocked(current.mission)) return;
@@ -109,6 +113,7 @@ app.addEventListener('click', event => {
     document.querySelector('.feedback')?.focus({preventScroll:true});
   }
 });
+if (route().page === 'test' && route().mission) resumeExercise(route().mission);
 render();
 
 // Keep keyboard navigation within the open introductory dialog.
@@ -117,6 +122,7 @@ app.addEventListener('keydown', event => {
   if (!dialog) return;
   if (event.key==='Escape') {
     introOpen=false;
+    preferences.dismissIntro();
     render();
     document.querySelector('[data-action="intro"]')?.focus();
     return;

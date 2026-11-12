@@ -7,3 +7,8 @@
 !docker/
 !docker/nginx.conf
 !Dockerfile
+!package.json
+!server/
+!server/**
+!teacher/
+!teacher/**

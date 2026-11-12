@@ -76,3 +76,37 @@ export class ProgressStore {
     return result;
   }
 }
+
+/** Browser display preferences kept separate from learning results. */
+export class PreferencesStore {
+  #storage;
+  #value = {theme:'system',introSeen:false};
+  #key = 'python-lab-preferences';
+
+  /** @param {Storage|function():Storage} storage Lazy browser adapter. Reads once; blocked storage falls back to memory. */
+  constructor(storage) {
+    try {
+      this.#storage = typeof storage === 'function' ? storage() : storage;
+      const value = JSON.parse(this.#storage.getItem(this.#key) || 'null');
+      if (value) this.#value = {theme:['light','dark','system'].includes(value.theme) ? value.theme : 'system',introSeen:value.introSeen === true};
+    } catch { /* Defaults also support private and restricted browsers. */ }
+  }
+
+  /** @returns {{theme:string,introSeen:boolean}} Independent preferences; no side effects. */
+  load() { return {...this.#value}; }
+
+  /** @param {string} theme light, dark or system. @returns {object} Updated preferences; persists when possible. */
+  setTheme(theme) {
+    if (!['light','dark','system'].includes(theme)) throw new RangeError('Unknown theme.');
+    this.#value.theme = theme;
+    return this.#save();
+  }
+
+  /** @returns {object} Updated preferences; persists that introduction was dismissed. */
+  dismissIntro() {this.#value.introSeen = true; return this.#save();}
+
+  #save() {
+    try {this.#storage?.setItem(this.#key,JSON.stringify(this.#value));} catch { /* Keep session value. */ }
+    return this.load();
+  }
+}
