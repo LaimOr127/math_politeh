@@ -1,6 +1,6 @@
 import {javaCourse} from './course.js';
 import {shortestPath,checkAnswer} from './domain.js';
-import {ProgressStore} from '../src/storage/ProgressStore.js';
+import {ProgressStore} from '/site/src/storage/ProgressStore.js';
 const lessons=javaCourse.lessons;
 const store=new ProgressStore(()=>window.localStorage,lessons.map(l=>({id:l.id,exercises:l.tasks})),'java-orbit-progress');
 const notes=new Map();

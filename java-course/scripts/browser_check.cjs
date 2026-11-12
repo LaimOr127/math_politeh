@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'../..'),base=process.env.BASE_URL||'http://lo
  const course=JSON.parse(await fs.readFile(path.join(root,'java-course/content/course.json'),'utf8'));
  const out=path.join(root,'.build/java-review/browser');await fs.mkdir(out,{recursive:true});
  try{
-  await page.goto(base+'/site/java/#java-02');check(await page.locator('form.task button[type=submit]').first().isDisabled(),true);
+  await page.goto(base+'/java/#java-02');check(await page.locator('form.task button[type=submit]').first().isDisabled(),true);
   await page.locator('#lesson-nav a[href="#java-01"]').click();await page.locator('h1').filter({hasText:'Первый сигнал'}).waitFor();
   await page.keyboard.press('Tab');
   for(const [index,lesson] of course.lessons.entries()){
@@ -53,6 +53,30 @@ const root=path.resolve(__dirname,'../..'),base=process.env.BASE_URL||'http://lo
   }
   check(await page.locator('#progress-label').textContent(),'1 из 10');await tabTo(a=>a.href==='#java-02');await page.keyboard.press('Enter');await page.locator('h1').filter({hasText:'Шлюз доверия'}).waitFor();check(await page.locator('main').evaluate(e=>e===document.activeElement),true);
   await page.keyboard.press('Shift+Tab');check(await page.locator('#reset').evaluate(e=>e===document.activeElement),true);await page.keyboard.press('Space');check(await page.locator('#progress-label').textContent(),'0 из 10');
+  // Each entry point and teacher catalogue works without linking to the other course.
+  await page.goto(base+'/python/');
+  await page.locator('a[href="/python/teacher/"]').first().waitFor();
+  check(await page.locator('a[href="/java/"],a[href="/site/java/"]').count(),0);
+  for(const [course,total,prefix,runtime] of [['python',8,'/lessons/output/','Python 3'],['java',10,'/java-course/output/','JDK 21']]){
+    await page.goto(base+'/'+course+'/teacher/');
+    await page.locator('#course-name').filter({hasText:course==='java'?'Орбита Java':'Лаборатория Питона'}).waitFor({state:'attached'});
+    const other=course==='java'?'python':'java';
+    check(await page.locator('a[href="/'+other+'/"],a[href="/site/java/"]').count(),0);
+    check(await page.locator('[data-course-home]').evaluateAll(as=>as.every(a=>a.pathname==='/'+location.pathname.split('/')[1]+'/')),true);
+    await page.locator('#teacher-code').fill('lesson');await page.locator('#login-button').click();await page.locator('#materials-panel').waitFor({state:'visible'});
+    check(await page.locator('.material-item').count(),total);check(await page.locator('.guide-download').count(),2);
+    check(await page.locator('#lesson-links a,#guide-links a').evaluateAll((as,prefix)=>as.every(a=>a.pathname.startsWith(prefix)),prefix),true);
+    check((await page.locator('#course-runtime').textContent()).includes(runtime),true);
+    for(const width of [320,360,768,1440]){
+      await page.setViewportSize({width,height:900});
+      for(let theme=0;theme<2;theme++){
+        await page.locator('[data-action=theme]').click();
+        check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+      }
+    }
+    await page.screenshot({path:path.join(out,course+'-teacher-desktop.png')});
+    await page.locator('#logout-button').click();await page.locator('#login-panel').waitFor({state:'visible'});
+  }
   await page.goto(base+'/teacher/');await page.locator('#login-form input[name=code]').fill('wrong');await page.locator('#login-button').click();await page.locator('#login-status').filter({hasText:'Код не подошёл'}).waitFor();
   await page.locator('#login-form input[name=code]').fill('lesson');await page.locator('#login-button').click();await page.locator('#materials-panel').waitFor({state:'visible'});
   check(await page.locator('.material-item').count(),18);check(await page.locator('.guide-download').count(),4);

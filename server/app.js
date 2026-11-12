@@ -36,6 +36,15 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
       try { pathname = decodeURIComponent(url.pathname); } catch {return json(400,{message:'Некорректный адрес.'});}
       if (pathname.includes('\\') || pathname.includes('\0') || pathname.split('/').some(p => p === '..' || p.startsWith('.'))) return json(404,{message:'Страница не найдена.'});
       const materialRequest = pathname.startsWith('/lessons/') || pathname.startsWith('/java-course/');
+      // Course entry points share infrastructure, not navigation or course data.
+      if (/^\/(python|java)(\/teacher)?$/.test(pathname)) {
+        res.writeHead(308,{Location:pathname+'/'+url.search});return res.end();
+      }
+      if (/^\/(python|java)\/teacher\/(index\.html)?$/.test(pathname)) pathname='/teacher/index.html';
+      else if (pathname.startsWith('/python/')) {
+        if (/^\/python\/java(?:\/|$)/.test(pathname)) return json(404,{message:'Страница не найдена.'});
+        pathname='/site/'+pathname.slice('/python/'.length);
+      } else if (pathname.startsWith('/java/')) pathname='/site/java/'+pathname.slice('/java/'.length);
       const timestamp = now();
       // Bound retained state and discard expired entries on every request.
       for (const [key,value] of sessions) if (value <= timestamp) sessions.delete(key);
@@ -79,7 +88,13 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
       if (pathname.startsWith('/api/teacher/')) {
         if (!authenticated) return json(401,{message:'Введите код преподавателя.'});
         if (pathname === '/api/teacher/session') return json(200,{authenticated:true});
-        if (pathname === '/api/teacher/materials') return json(200,{lessons,guides,javaCourse});
+        if (pathname === '/api/teacher/materials') {
+          const selected=url.searchParams.getAll('course');
+          if (!selected.length) return json(200,{lessons,guides,javaCourse});
+          if (selected.length !== 1 || !['python','java'].includes(selected[0])) return json(400,{message:'Неизвестный курс.'});
+          const course=selected[0];
+          return json(200,course === 'java' ? {course,...javaCourse} : {course,title:'Лаборатория Питона',lessons,guides});
+        }
         return json(404,{message:'Страница не найдена.'});
       }
       if (materialRequest) {
