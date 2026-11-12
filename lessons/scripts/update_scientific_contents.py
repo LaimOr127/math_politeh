@@ -53,6 +53,7 @@ def materialise(docx, pdf, entries_path, check=False):
         assert len(values) >= 2 and title in values[0].text, ('Unexpected TOC cache', title)
         if check:
             assert values[-1].text == str(page_number), ('Outdated contents page', title)
+            assert p.xpath('./w:hyperlink/w:r/w:tab', namespaces=NS), ('Missing tab inside contents link', title)
             continue
         values[-1].text = str(page_number)
         body = [item for item in document.findall('.//w:body/w:p', NS)
@@ -68,11 +69,17 @@ def materialise(docx, pdf, entries_path, check=False):
             body[0].append(end)
         if p.find('w:hyperlink', NS) is None:
             link = ET.Element(tag('hyperlink'), {tag('anchor'): anchor, tag('history'): '1'})
-            text_runs = [run for run in p.findall('w:r', NS) if run.find('w:t', NS) is not None]
+            text_runs = p.findall('w:r', NS)
             insertion = p.index(text_runs[0])
             for run in text_runs:
                 p.remove(run); link.append(run)
             p.insert(insertion, link)
+        else:
+            # Repair old caches that left the tab after the linked page number.
+            link = p.find('w:hyperlink', NS)
+            for run in p.findall('w:r', NS):
+                if run.find('w:tab', NS) is not None:
+                    p.remove(run); link.insert(max(0, len(link)-1), run)
     if check:
         print(f'Confirmed {len(entries)} contents page numbers against {len(pages)} rendered pages.')
         return
@@ -94,7 +101,7 @@ def materialise(docx, pdf, entries_path, check=False):
     temporary.replace(docx)
     result = {'rendered_pages': len(pages), 'contents': [
         {'title': entry[0], 'page': page} for entry, page in zip(entries, heading_pages)]}
-    (ROOT/'.build/scientific-review/contents-check.json').write_text(
+    (entries_path.parent/'contents-check.json').write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Materialised {len(entries)} linked contents entries from {len(pages)} rendered pages.')
 

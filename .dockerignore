@@ -12,3 +12,7 @@
 !server/**
 !teacher/
 !teacher/**
+
+!java-course/
+!java-course/output/
+!java-course/output/**

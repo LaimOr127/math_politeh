@@ -4,10 +4,11 @@ import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { courseLessons } from '../site/src/data/course.js';
+import {javaCourse as javaContent} from '../site/java/course.js';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const COOKIE = 'python_lab_teacher';
-const MIME = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
+const MIME = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.ico':'image/x-icon','.zip':'application/zip','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
 const digest = value => createHash('sha256').update(value).digest();
 
 /** @param {object} options Server settings; codes stay on the server. @returns {http.Server} Unbound HTTP server. Sessions are held in memory until logout, expiry or restart. */
@@ -20,7 +21,8 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
     return {id, title:lesson.title, presentation:`/lessons/output/lesson-${id}-presentation.pptx`, script:`/lessons/output/lesson-${id}-teacher-script.docx`};
   });
   const guides = [{title:'Краткое пособие ученика',url:'/lessons/output/new-learning-guide.docx'},{title:'Научно методическое пособие',url:'/lessons/output/scientific-methodical-guide.docx'}];
-  const allowedFiles = new Set([...lessons.flatMap(l => [l.presentation,l.script]),...guides.map(g => g.url)]);
+  const javaCourse = {title:javaContent.title,lessons:javaContent.lessons.map((lesson,i)=>{const id=String(i+1).padStart(2,'0');return {id,title:lesson.title,duration:90,presentation:'/java-course/output/lesson-'+id+'-presentation.pptx',script:'/java-course/output/lesson-'+id+'-teacher-script.docx'};}),guides:[{title:'Научно-методическое пособие по Java',url:'/java-course/output/scientific-methodical-guide.docx'},{title:'Java Все материалы и исходники ZIP',url:'/java-course/output/java-course-materials.zip'}]};
+  const allowedFiles = new Set([...lessons.flatMap(l => [l.presentation,l.script]),...guides.map(g => g.url),...javaCourse.lessons.flatMap(l=>[l.presentation,l.script]),...javaCourse.guides.map(g=>g.url)]);
 
   const server = http.createServer(async (req,res) => {
     res.setHeader('X-Content-Type-Options','nosniff');
@@ -33,6 +35,7 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
       let pathname;
       try { pathname = decodeURIComponent(url.pathname); } catch {return json(400,{message:'Некорректный адрес.'});}
       if (pathname.includes('\\') || pathname.includes('\0') || pathname.split('/').some(p => p === '..' || p.startsWith('.'))) return json(404,{message:'Страница не найдена.'});
+      const materialRequest = pathname.startsWith('/lessons/') || pathname.startsWith('/java-course/');
       const timestamp = now();
       // Bound retained state and discard expired entries on every request.
       for (const [key,value] of sessions) if (value <= timestamp) sessions.delete(key);
@@ -76,10 +79,10 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
       if (pathname.startsWith('/api/teacher/')) {
         if (!authenticated) return json(401,{message:'Введите код преподавателя.'});
         if (pathname === '/api/teacher/session') return json(200,{authenticated:true});
-        if (pathname === '/api/teacher/materials') return json(200,{lessons,guides});
+        if (pathname === '/api/teacher/materials') return json(200,{lessons,guides,javaCourse});
         return json(404,{message:'Страница не найдена.'});
       }
-      if (pathname.startsWith('/lessons/')) {
+      if (materialRequest) {
         if (!authenticated) return json(401,{message:'Для скачивания войдите в кабинет преподавателя.'});
         if (!allowedFiles.has(pathname)) return json(404,{message:'Файл не найден.'});
       } else if (!pathname.startsWith('/site/') && !['/teacher/','/teacher/index.html','/teacher/app.js'].includes(pathname)) {
@@ -93,9 +96,9 @@ export function createApp({codes = (process.env.TEACHER_CODES ?? 'lesson').split
       const info = await stat(filename).catch(() => null);
       if (!info?.isFile()) return json(404,{message:'Файл не найден.'});
       res.setHeader('Content-Type',MIME[path.extname(filename)] || 'application/octet-stream');
-      res.setHeader('Cache-Control', pathname.startsWith('/lessons/') ? 'private, no-store' : 'no-cache');
+      res.setHeader('Cache-Control', materialRequest ? 'private, no-store' : 'no-cache');
       res.setHeader('Content-Length',info.size);
-      if (pathname.startsWith('/lessons/')) res.setHeader('Content-Disposition',`attachment; filename="${path.basename(filename)}"`);
+      if (materialRequest) res.setHeader('Content-Disposition',`attachment; filename="${path.basename(filename)}"`);
       if (req.method === 'HEAD') return res.end();
       res.end(await readFile(filename));
     } catch (error) {

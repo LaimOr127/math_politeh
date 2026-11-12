@@ -2,11 +2,14 @@
   "name": "python-lab-course",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server/index.js",
     "test": "node --test site/tests/*.test.js server/tests/*.test.js",
     "sync:site": "node lessons/scripts/sync_site.mjs",
-    "check": "node lessons/scripts/sync_site.mjs --check && npm run test"
+    "check": "node lessons/scripts/sync_site.mjs --check && node java-course/scripts/sync.mjs --check && npm run test",
+    "sync:java": "node java-course/scripts/sync.mjs"
   }
 }

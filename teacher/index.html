@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
   <meta name="theme-color" content="#f3f0fa"><link rel="icon" href="/site/assets/genesis-mark.svg" type="image/svg+xml"><link rel="preload" href="/site/assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-    <title>Преподавателю · Лаборатория Питона</title><link rel="stylesheet" href="/site/styles.css">
+    <title>Преподавателю · Python и Java</title><link rel="stylesheet" href="/site/styles.css">
 </head>
 <body>
   <a class="skip-link" href="#content">К содержимому</a>
-  <header class="topbar"><a class="brand" href="/site/"><img class="brand-mark" src="/site/assets/genesis-mark.svg" width="40" height="40" alt=""><span>Генезис-X<small>Лаборатория Питона · Python</small></span></a><nav class="main-nav" aria-label="Главное меню"><a href="/site/">К урокам ↗</a><button class="theme-button" data-action="theme" type="button">Сменить тему</button></nav></header>
+  <header class="topbar"><a class="brand" href="/site/"><img class="brand-mark" src="/site/assets/genesis-mark.svg" width="40" height="40" alt=""><span>Генезис-X<small>Учебные курсы Python и Java</small></span></a><nav class="main-nav" aria-label="Главное меню"><a href="/site/">Python</a><a href="/site/java/">Java</a><button class="theme-button" data-action="theme" type="button">Сменить тему</button></nav></header>
   <main id="content" tabindex="-1">
     <section id="login-panel" class="teacher-login">
-      <div class="login-story"><p class="eyebrow">Центр управления занятиями</p><h1>Всё для вашей<br>следующей миссии.</h1><p class="lead">Презентации, сценарии восьми занятий и пособия по Python. В одном месте, в одной последовательности.</p><img src="/site/assets/iskra.webp" alt="Искра — помощник преподавателя" width="230" height="252"></div>
+      <div class="login-story"><p class="eyebrow">Центр управления занятиями</p><h1>Материалы для<br>преподавателя.</h1><p class="lead">Презентации, сценарии и пособия по Python для 5–6 классов и Java для 10–11 классов.</p><img src="/site/assets/iskra.webp" alt="Искра — помощник преподавателя" width="230" height="252"></div>
       <form id="login-form" class="login-card"><span class="orbit-label">Для преподавателя</span><h2>Добро пожаловать</h2><p>Введите код преподавателя или кодовое слово, которое вам передал организатор курса.</p><label for="teacher-code">Код доступа</label><input id="teacher-code" name="code" type="password" autocomplete="current-password" required maxlength="200" placeholder="Введите код…" spellcheck="false" autocapitalize="none" aria-describedby="login-status"><button class="primary-button" id="login-button" type="submit">Открыть материалы →</button><p id="login-status" class="form-status" role="status" aria-live="polite"></p><a class="back-link" href="/site/">← Вернуться к урокам</a></form>
     </section>
     <section id="materials-panel" class="materials-page" hidden>
-      <div class="section-header"><div><p class="eyebrow">Кабинет преподавателя</p><h1 tabindex="-1" id="materials-heading">Планируем открытия.</h1><p class="lead">Восемь занятий по 45 минут. Сначала подготовьте среду, затем выберите урок.</p></div><button class="secondary-button" id="logout-button" type="button">Выйти из кабинета</button></div>
+      <div class="section-header"><div><p class="eyebrow">Кабинет преподавателя</p><h1 tabindex="-1" id="materials-heading">Материалы курсов</h1><p class="lead">Python: 8 занятий по 45 минут. Java: 10 занятий по 90 минут. Презентации и сценарии расположены по порядку.</p></div><button class="secondary-button" id="logout-button" type="button">Выйти из кабинета</button></div>
       <div id="guide-links" class="guide-links"></div><div class="section-header"><h2>Материалы по урокам</h2><span>Презентация + сценарий</span></div><div id="lesson-links" class="materials-list"></div><p class="muted">Примеры выполняются локально в Python 3. Ответы и решения находятся в сценариях преподавателя.</p>
     </section>
   </main>

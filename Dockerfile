@@ -6,6 +6,7 @@ COPY server/ ./server/
 COPY site/ ./site/
 COPY teacher/ ./teacher/
 COPY lessons/output/ ./lessons/output/
+COPY java-course/output/ ./java-course/output/
 ENV NODE_ENV=production PORT=8080
 USER node
 

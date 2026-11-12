@@ -115,3 +115,21 @@ test('HTTPS proxy configuration protects writes and serves local brand assets wi
     assert.doesNotMatch(assetResponse.headers.get('content-security-policy'),/unsafe-inline|unsafe-eval/);
   }
 });
+
+test('Java materials share teacher protection while retaining Python catalogue', async t=>{
+ const server=createApp({codes:['lesson']});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>server.close(r)));
+ const base='http://127.0.0.1:'+server.address().port;
+ const file='/java-course/output/lesson-01-presentation.pptx';
+ assert.equal((await fetch(base+file)).status,401);
+ const login=await fetch(base+'/api/teacher/login',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({code:'lesson'})});
+ const cookie=login.headers.get('set-cookie').split(';')[0];
+ const catalog=await (await fetch(base+'/api/teacher/materials',{headers:{Cookie:cookie}})).json();
+ assert.equal(catalog.lessons.length,8);assert.equal(catalog.javaCourse.lessons.length,10);assert.equal(catalog.javaCourse.guides.length,2);
+ for(const url of [...catalog.javaCourse.lessons.flatMap(x=>[x.presentation,x.script]),...catalog.javaCourse.guides.map(x=>x.url)])assert.equal((await fetch(base+url,{method:'HEAD',headers:{Cookie:cookie}})).status,200,url);
+ assert.equal((await fetch(base+'/java-course/content/course.json',{headers:{Cookie:cookie}})).status,404);
+ assert.equal((await fetch(base+'/java-course/project/Main.java',{headers:{Cookie:cookie}})).status,404);
+ const head=await fetch(base+file,{method:'HEAD',headers:{Cookie:cookie}});assert.equal(head.headers.get('cache-control'),'private, no-store');assert.match(head.headers.get('content-disposition'),/^attachment/);
+ assert.equal((await fetch(base+'/site/java/')).status,200);
+ await fetch(base+'/api/teacher/logout',{method:'POST',headers:{Origin:base,'Content-Type':'application/json',Cookie:cookie},body:'{}'});
+ for(const url of [...catalog.javaCourse.lessons.flatMap(x=>[x.presentation,x.script]),...catalog.javaCourse.guides.map(x=>x.url)])assert.equal((await fetch(base+url,{method:'HEAD',headers:{Cookie:cookie}})).status,401,url);
+});

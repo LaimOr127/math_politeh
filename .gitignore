@@ -9,3 +9,5 @@ __pycache__/
 graphify-out/
 .env.*
 !.env.example
+
+*.class

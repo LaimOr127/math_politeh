@@ -9,3 +9,8 @@
 *.docx binary
 *.pptx binary
 *.png binary
+
+*.java text eol=lf
+*.cjs text eol=lf
+java-course/examples/**/*.txt text eol=lf
+*.zip binary

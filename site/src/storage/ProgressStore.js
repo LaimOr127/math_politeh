@@ -4,10 +4,11 @@ export class ProgressStore {
   #missions;
   #snapshot;
   #persistent = true;
-  #key = 'python-lab-progress';
+  #key;
 
-  /** @param {Storage|function():Storage} storage Adapter or lazy provider (may throw). @param {Array<{id:string,exercises:Array<{id:string}>}>} missions Course order and exercise IDs. Reads storage once; preserves completed v1 lessons. */
-  constructor(storage, missions) {
+  /** @param {Storage|function():Storage} storage Adapter or lazy provider (may throw). @param {Array<{id:string,exercises:Array<{id:string}>}>} missions Course order and exercise IDs. @param {string} key Independent course storage key. Reads storage once; preserves completed v1 lessons. */
+  constructor(storage, missions, key = 'python-lab-progress') {
+    this.#key = key;
     this.#missions = missions.map(m => typeof m === 'string' ? {id:m,exercises:[{id:'main'}]} : m);
     this.#snapshot = this.#empty();
     try {

@@ -14,10 +14,10 @@ async function showMaterials(focus = true) {
   const response=await fetch('/api/teacher/materials',{cache:'no-store'});
   if (!response.ok) throw new Error('Сессия завершилась. Введите код ещё раз.');
   const data=await response.json();
-  document.querySelector('#guide-links').replaceChildren(...data.guides.map(guide => {const a=link(guide.title+' ↓',guide.url);a.className='guide-download';return a;}));
-  document.querySelector('#lesson-links').replaceChildren(...data.lessons.map(lesson => {
+  document.querySelector('#guide-links').replaceChildren(...[...data.guides,...(data.javaCourse?.guides ?? [])].map(guide => {const a=link(guide.title+' ↓',guide.url);a.className='guide-download';return a;}));
+  document.querySelector('#lesson-links').replaceChildren(...[...data.lessons,...(data.javaCourse?.lessons ?? [])].map(lesson => {
     const article=document.createElement('article');article.className='material-item';
-    const info=document.createElement('div');const number=document.createElement('p');number.className='eyebrow';number.textContent=`Миссия ${lesson.id} · 45 минут`;
+    const info=document.createElement('div');const number=document.createElement('p');number.className='eyebrow';number.textContent=`${lesson.duration ? 'Java · Занятие' : 'Python · Миссия'} ${lesson.id} · ${lesson.duration ?? 45} минут`;
     const title=document.createElement('h3');title.textContent=lesson.title;info.append(number,title);
     const links=document.createElement('div');links.className='material-links';links.append(link('Презентация ↓',lesson.presentation),link('Сценарий Word ↓',lesson.script));
     article.append(info,links);return article;
