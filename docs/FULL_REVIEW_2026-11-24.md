@@ -53,3 +53,8 @@
 Запустите npm run check. С внешним Playwright задайте RUNTIME_NODE_MODULES и BASE_URL, затем выполните node lessons/scripts/browser_check.cjs и node java-course/scripts/browser_check.cjs. Процедуры отрисовки и проверки Office описаны в lessons/scripts/README.md и java-course/README.md.
 
 Локальные свидетельства проверки находятся в .build/audit-20261124/, .build/python-browser/, .build/java-review/browser/ и .build/deployment/. Они исключены из Git как временные результаты. Точный выпуск, резервная копия и результат размещения фиксируются в DEPLOYMENT.md.
+
+
+## Результат публикации
+
+На сервере опубликован commit 231c1df17e64d36a439d8809e3067e47b47f519c. После переключения оба браузерных сценария и внешняя HTTP-приёмка повторно прошли по публичному адресу; все 40 материалов совпали с локальными. /java/course.js также совпал побайтно. Контейнер healthy, процесс работает от node; сохранена резервная копия, 20 соседних контейнеров не изменены. Точные пути и процедура — в DEPLOYMENT.md.
