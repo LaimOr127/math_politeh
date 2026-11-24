@@ -37,7 +37,7 @@ def verify():
         assert sum(s['minutes'] for s in l['slides'])==90
         assert sum(s['minutes'] for s in l['slides'][:7])==45
         with zipfile.ZipFile(OUT/f'lesson-{i:02d}-teacher-script.docx') as z:script=text(z,'word/document.xml',W+'t')
-        for value in [l['title'],l['code'],l['stdout'],l['lab'],l['solution'],l['homework'],*[t['text'] for t in l['theory']]]:
+        for value in [l['title'],l['ege'],l['code'],l['stdout'],l['lab'],l['solution'],l['homework'],*[t['text'] for t in l['theory']]]:
             assert norm(value) in full,(i,value[:40])
         assert norm(l['code']) in script
         for extra in l.get('extraExamples',[]):assert norm(extra['code']) in script and norm(extra['code']) in full
@@ -47,6 +47,7 @@ def verify():
             for j,s in enumerate(l['slides'],1):
                 notes=text(z,f'ppt/notesSlides/notesSlide{j}.xml',A+'t')
                 assert norm(s['teacher']) in notes and norm(s['answer']) in notes
+                for paragraph in s['body']:assert norm(paragraph) in notes,(i,j,'Stale slide body in speaker notes')
                 assert norm(s['teacher']) in script and norm(s['answer']) in script
                 assert norm(s['teacher']) in full
                 xml=z.read(f'ppt/slides/slide{j}.xml')

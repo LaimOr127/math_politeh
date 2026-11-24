@@ -32,3 +32,11 @@ test('Java Office artifacts retain all canonical examples, teacher notes and lin
  const run=spawnSync(process.env.PYTHON||(process.platform==='win32'?'python':'python3'),['-I','-X','utf8',fileURLToPath(new URL('../../java-course/scripts/verify_materials.py',import.meta.url))],{encoding:'utf8',timeout:20000});
  assert.equal(run.status,0,run.stderr||String(run.error));
 });
+
+test('EGE mapping distinguishes algorithm execution from graph enrichment',()=>{
+ assert.match(canonical.examNote,/задание 23[^.]*ход исполнения алгоритма/i);
+ assert.match(canonical.lessons[5].ege,/программ исполнителя/i);
+ for(const lesson of canonical.lessons.slice(6,8)) {
+  assert.doesNotMatch(lesson.ege,/соответствуют тематике задания 23|основа задания 23|новой тематик/i);
+ }
+});

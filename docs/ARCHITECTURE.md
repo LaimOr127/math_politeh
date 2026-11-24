@@ -2,7 +2,7 @@
 
 ## Границы
 
-Один сервер Node.js раздаёт публичный интерфейс `/site/`, форму `/teacher/` и защищённые файлы. База данных и аккаунты учащихся не используются. Прогресс, тема и отметка знакомства хранятся в браузере. Python исполняется локально в VS Code, сервер код ученика не принимает.
+Один сервер Node.js раздаёт независимые интерфейсы `/python/` и `/java/`, кабинеты `/python/teacher/` и `/java/teacher/` и защищённые файлы. Старые `/site/`, `/site/java/` и `/teacher/` сохраняются для совместимости. База данных и аккаунты учащихся не используются. Прогресс, тема и отметка знакомства хранятся в браузере. Python исполняется локально в VS Code, сервер код ученика не принимает.
 
 ## Слои
 
@@ -20,7 +20,7 @@ course.js → domain/Mission.js → ui/app.js
                                   ├── ProgressStore
                                   └── PreferencesStore
 
-teacher/app.js → /api/teacher/* → server/app.js → lessons/output
+teacher/app.js → /api/teacher/* → server/app.js → lessons/output и java-course/output
 ```
 
 `Mission` проверяет упражнения и порядок открытия. `ProgressStore` валидирует прогресс и мигрирует старые завершённые уроки. `PreferencesStore` независимо сохраняет тему и отметку знакомства. Только `ProgressStore.js` обращается к localStorage. `ui/theme.js` применяет тему обеих страниц.

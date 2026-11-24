@@ -11,7 +11,8 @@ API возвращает JSON с Cache-Control no-store. Учебные файл
 | GET /api/teacher/session | Проверка сессии | 200 или 401 |
 | GET /api/teacher/materials | Каталог lessons, guides и javaCourse | 200 или 401 |
 | POST /api/teacher/logout | Отзыв сессии | 200, 403 |
-| GET /lessons/output/имя | Разрешённый DOCX/PPTX | 200, 401, 404 |
+| GET /lessons/output/имя | Разрешённый DOCX/PPTX Python | 200, 401, 404 |
+| GET /java-course/output/имя | Разрешённый DOCX/PPTX/ZIP Java | 200, 401, 404 |
 
 Вход принимает JSON-объект с текстовым `code`. Некорректный JSON, `null`, массивы, скаляры и нетекстовый код возвращают 400; неверный текстовый код — 401. Тело ограничено 2048 байтами (413 при превышении); UTF-8 декодируется после получения всех частей запроса.
 
